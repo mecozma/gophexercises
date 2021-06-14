@@ -11,6 +11,8 @@ func main() {
 	// declare the csvFile flag.
 	csvFile := flag.String("csv", "challenges.scv", `a csv file in format 
 		of 'question,answer`)
+	timeLimit := flag.Int("limit", 60, `the time limit for the quiz in seconds`)
+
 	flag.Parse()
 
 	// open the csv file and check for errors.
@@ -32,6 +34,6 @@ func main() {
 	challenges := parseLines(lines)
 
 	// print the quiz answers.
-	printQuestion(challenges)
+	printQuestion(challenges, timeLimit)
 
 }

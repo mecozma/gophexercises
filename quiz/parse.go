@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 // struct with the question and answer.
@@ -31,23 +32,33 @@ func exit(msg string) {
 }
 
 // print the quiz questions and check if the answer is right.
-func printQuestion(challenges []problem) {
+func printQuestion(challenges []problem, limit *int) {
+	timer := time.NewTimer(time.Duration(*limit) * time.Second)
 	countAnswers := 0
 	for i, c := range challenges {
-		fmt.Printf("Question #%d : %s = \n", i+1, c.question)
+		fmt.Printf("Question #%d : %s = ", i+1, c.question)
+		answerCh := make(chan string)
+		go func() {
+			// get the user's answer.
+			var answer string
+			fmt.Scanf("%s\n", &answer)
+			answerCh <- answer
+		}()
 
-		// get the user's answer.
-		var answer string
-		fmt.Scanf("%s\n", &answer)
-		if answer == c.answer {
-			countAnswers++
+		select {
+		case <-timer.C:
+			quizScore(countAnswers, challenges)
+			return
+		case answer := <-answerCh:
+			if answer == c.answer {
+				countAnswers++
+			}
+
 		}
-
 	}
-	quizScore(countAnswers, challenges)
 }
 
 // print quiz's score.
 func quizScore(score int, challenges []problem) {
-	fmt.Printf("You scored %d from %d questions!\n", score, len(challenges))
+	fmt.Printf("\nYou scored %d from %d questions!\n", score, len(challenges))
 }
